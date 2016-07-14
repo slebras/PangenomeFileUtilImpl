@@ -1,0 +1,19 @@
+{
+    "name" : "Get a TSV File for a Pangenome",
+    "short_description" : 
+        "Use this method to get a Pangenome as a TSV File.",
+
+    "long_description" : "todo: write longer description",
+
+    "tags" : {
+        "categories" : [],
+        "input": {
+            "file_types": [],
+            "kb_types": ["KBaseGenomes.Pangenome"]
+        },
+        "output": {
+            "file_types": ["tsv"],
+            "kb_types": []
+        }
+    }
+}

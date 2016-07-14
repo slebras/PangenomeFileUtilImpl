@@ -1,0 +1,19 @@
+{
+    "name" : "Get an Excel File for a Pangenome",
+    "short_description" : 
+        "Use this method to get a Pangenome as an Excel File.",
+
+    "long_description" : "todo: write longer description",
+
+    "tags" : {
+        "categories" : [],
+        "input": {
+            "file_types": [],
+            "kb_types": ["KBaseGenomes.Pangenome"]
+        },
+        "output": {
+            "file_types": ["excel"],
+            "kb_types": []
+        }
+    }
+}
