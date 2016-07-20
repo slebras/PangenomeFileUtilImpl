@@ -10,6 +10,8 @@ from pprint import pprint, pformat
 
 from biokbase.workspace.client import Workspace
 
+from DataFileUtil.DataFileUtilClient import DataFileUtil
+
 #END_HEADER
 
 
@@ -29,8 +31,8 @@ class PangenomeFileUtil:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = "HEAD"
+    GIT_URL = "git@github.com:kbaseapps/PangenomeFileUtilImpl.git"
+    GIT_COMMIT_HASH = "361a61c8687721bbbf8bc3afb348af929d1e82d5"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -107,24 +109,13 @@ class PangenomeFileUtil:
         for f in dir_contents:
             if os.path.isfile(os.path.join(working_dir, f)):
                 if f.endswith('_Genomes.tsv'):
-                    files['genome_path'] = os.path.join(working_dir,f)
+                    files['genomes_path'] = os.path.join(working_dir,f)
                 if f.endswith('_Orthologs.tsv'):
                     files['orthologs_path'] = os.path.join(working_dir,f)
-        if 'genome_path' not in files:
+        if 'genomes_path' not in files:
             raise ValueError('Something went wrong- no genome TSV file created')
         if 'orthologs_path' not in files:
             raise ValueError('Something went wrong- no orthologs TSV file created')
-
-        # if we need to upload to shock, well then zip it and do that too.
-        if 'save_to_shock' in params and params['save_to_shock'] == 1:
-            #dfUtil = DataFileUtil(self.callback_url, token=ctx['token'])
-            #file['shock_id'] =dfUtil.file_to_shock({
-            #                        'file_path':output_file_path,
-            #                        'gzip':0,
-            #                        'make_handle':0
-            #                        #attributes: {} #we can set shock attributes if we want
-            #                    })['shock_id']
-            pass;
 
         #END pangenome_to_tsv_file
 
@@ -195,17 +186,6 @@ class PangenomeFileUtil:
         if 'path' not in file:
             raise ValueError('Something went wrong- no Excel file created')
 
-        # if we need to upload to shock, well then do that too.
-        if 'save_to_shock' in params and params['save_to_shock'] == 1:
-            #dfUtil = DataFileUtil(self.callback_url, token=ctx['token'])
-            #file['shock_id'] =dfUtil.file_to_shock({
-            #                        'file_path':output_file_path,
-            #                        'gzip':0,
-            #                        'make_handle':0
-            #                        #attributes: {} #we can set shock attributes if we want
-            #                    })['shock_id']
-            pass
-
         #END pangenome_to_excel_file
 
         # At some point might do deeper type checking...
@@ -214,6 +194,109 @@ class PangenomeFileUtil:
                              'file is not type dict as required.')
         # return the results
         return [file]
+
+    def export_pangenome_as_tsv_file(self, ctx, params):
+        """
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN export_pangenome_as_tsv_file
+
+        print('export_pangenome_as_tsv_file -- paramaters = ')
+        pprint(params)
+
+        # validate parameters
+        if 'input_ref' not in params:
+            raise ValueError('Cannot export Pangenome- not input_ref field defined.')
+
+        # get WS metadata to get ws_name and obj_name
+        ws = Workspace(url=self.workspaceURL)
+        info = ws.get_object_info_new({'objects':[{'ref': params['input_ref'] }],'includeMetadata':0, 'ignoreErrors':0})[0]
+
+        # export to a file
+        file = self.pangenome_to_tsv_file(ctx, { 
+                                'pangenome_name': info[1],
+                                'workspace_name': info[7]
+                            })[0]
+
+        # create the output directory and move the files there
+        export_package_dir = os.path.join(self.scratch, info[1])
+        os.makedirs(export_package_dir)
+        shutil.move(file['genomes_path'], os.path.join(export_package_dir, os.path.basename(file['genomes_path'])))
+        shutil.move(file['orthologs_path'], os.path.join(export_package_dir, os.path.basename(file['orthologs_path'])))
+
+        # package it up and be done
+        dfUtil = DataFileUtil(self.callback_url)
+        package_details = dfUtil.package_for_download({
+                                    'file_path': export_package_dir,
+                                    'ws_refs': [ params['input_ref'] ]
+                                })
+
+        output = { 'shock_id': package_details['shock_id'] }
+
+        #END export_pangenome_as_tsv_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method export_pangenome_as_tsv_file return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
+
+    def export_pangenome_as_excel_file(self, ctx, params):
+        """
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN export_pangenome_as_excel_file
+
+        print('export_pangenome_as_excel_file -- paramaters = ')
+        pprint(params)
+
+        # validate parameters
+        if 'input_ref' not in params:
+            raise ValueError('Cannot export Pangenome- not input_ref field defined.')
+
+        # get WS metadata to get ws_name and obj_name
+        ws = Workspace(url=self.workspaceURL)
+        info = ws.get_object_info_new({'objects':[{'ref': params['input_ref'] }],'includeMetadata':0, 'ignoreErrors':0})[0]
+
+        # export to a file
+        file = self.pangenome_to_excel_file(ctx, { 
+                                'pangenome_name': info[1],
+                                'workspace_name': info[7]
+                            })[0]
+
+        # create the output directory and move the files there
+        export_package_dir = os.path.join(self.scratch, info[1])
+        os.makedirs(export_package_dir)
+        shutil.move(file['path'], os.path.join(export_package_dir, os.path.basename(file['path'])))
+        
+        # package it up and be done
+        dfUtil = DataFileUtil(self.callback_url)
+        package_details = dfUtil.package_for_download({
+                                    'file_path': export_package_dir,
+                                    'ws_refs': [ params['input_ref'] ]
+                                })
+
+        output = { 'shock_id': package_details['shock_id'] }
+
+        #END export_pangenome_as_excel_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method export_pangenome_as_excel_file return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
 
     def status(self, ctx):
         #BEGIN_STATUS

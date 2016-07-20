@@ -335,6 +335,14 @@ class Application(object):
                              name='PangenomeFileUtil.pangenome_to_excel_file',
                              types=[dict])
         self.method_authentication['PangenomeFileUtil.pangenome_to_excel_file'] = 'required'
+        self.rpc_service.add(impl_PangenomeFileUtil.export_pangenome_as_tsv_file,
+                             name='PangenomeFileUtil.export_pangenome_as_tsv_file',
+                             types=[dict])
+        self.method_authentication['PangenomeFileUtil.export_pangenome_as_tsv_file'] = 'required'
+        self.rpc_service.add(impl_PangenomeFileUtil.export_pangenome_as_excel_file,
+                             name='PangenomeFileUtil.export_pangenome_as_excel_file',
+                             types=[dict])
+        self.method_authentication['PangenomeFileUtil.export_pangenome_as_excel_file'] = 'required'
         self.rpc_service.add(impl_PangenomeFileUtil.status,
                              name='PangenomeFileUtil.status',
                              types=[dict])

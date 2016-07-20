@@ -179,4 +179,38 @@ public class PangenomeFileUtilClient {
         List<PangenomeExcelFile> res = caller.jsonrpcCall("PangenomeFileUtil.pangenome_to_excel_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
+
+    /**
+     * <p>Original spec-file function name: export_pangenome_as_tsv_file</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.pangenomefileutil.ExportParams ExportParams}
+     * @return   parameter "output" of type {@link us.kbase.pangenomefileutil.ExportOutput ExportOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ExportOutput exportPangenomeAsTsvFile(ExportParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<ExportOutput>> retType = new TypeReference<List<ExportOutput>>() {};
+        List<ExportOutput> res = caller.jsonrpcCall("PangenomeFileUtil.export_pangenome_as_tsv_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: export_pangenome_as_excel_file</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.pangenomefileutil.ExportParams ExportParams}
+     * @return   parameter "output" of type {@link us.kbase.pangenomefileutil.ExportOutput ExportOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ExportOutput exportPangenomeAsExcelFile(ExportParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<ExportOutput>> retType = new TypeReference<List<ExportOutput>>() {};
+        List<ExportOutput> res = caller.jsonrpcCall("PangenomeFileUtil.export_pangenome_as_excel_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
 }

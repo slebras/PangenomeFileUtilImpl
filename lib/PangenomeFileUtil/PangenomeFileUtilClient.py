@@ -58,3 +58,25 @@ class PangenomeFileUtil(object):
         return self._client.call_method(
             'PangenomeFileUtil.pangenome_to_excel_file',
             [params], self._service_ver, context)
+
+    def export_pangenome_as_tsv_file(self, params, context=None):
+        """
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        return self._client.call_method(
+            'PangenomeFileUtil.export_pangenome_as_tsv_file',
+            [params], self._service_ver, context)
+
+    def export_pangenome_as_excel_file(self, params, context=None):
+        """
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        return self._client.call_method(
+            'PangenomeFileUtil.export_pangenome_as_excel_file',
+            [params], self._service_ver, context)

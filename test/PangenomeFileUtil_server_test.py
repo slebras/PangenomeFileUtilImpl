@@ -2,6 +2,7 @@ import unittest
 import os
 import json
 import time
+import shutil
 
 from os import environ
 try:
@@ -89,17 +90,33 @@ class PangenomeFileUtilTest(unittest.TestCase):
                                         {
                                             'pangenome_name':obj_name,
                                             'workspace_name':ws_name,
-                                            #'save_to_shock':1
                                         })
-
         pprint(res)
+
+        # attempt to create the download package
+        res = pfut.export_pangenome_as_tsv_file(self.getContext(),
+                                        {
+                                            'input_ref':ws_name + '/' + obj_name
+                                        })
+        pprint(res)
+        # need a little cleanup because we try to run on this object twice- normally
+        # the sdk will give you a fresh directory so this is not a problem.
+        shutil.rmtree(os.path.join(self.__class__.cfg['scratch'],obj_name))
+
+
 
         res = pfut.pangenome_to_excel_file(self.getContext(),
                                         {
                                             'pangenome_name':obj_name,
                                             'workspace_name':ws_name,
-                                            #'save_to_shock':1
                                         })
+        # attempt to create the download package
+        res = pfut.export_pangenome_as_excel_file(self.getContext(),
+                                        {
+                                            'input_ref':ws_name + '/' + obj_name
+                                        })
+        pprint(res)
+
 
         pprint(res)
 
