@@ -11,7 +11,7 @@ RUN apt-get install python-dev libffi-dev libssl-dev \
 # Install KBase Transform Scripts + dependencies
 # Note: may not always be safe to copy things to /kb/deployment/lib
 # Note: if you change install path of transform, update the deploy.cfg configuration appropriately
-RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/kbase/transform && \
+RUN mkdir -p /kb/temp && cd /kb/temp && git clone https://github.com/kbase/transform && \
     cd transform && git checkout d02762c && \
     cp -ar lib/Bio/KBase/Transform /kb/deployment/lib/Bio/KBase
 
