@@ -125,8 +125,6 @@ $files is a PangenomeFileUtil.PangenomeTsvFiles
 PangenomeToFileParams is a reference to a hash where the following keys are defined:
 	pangenome_name has a value which is a string
 	workspace_name has a value which is a string
-	save_to_shock has a value which is a PangenomeFileUtil.boolean
-boolean is an int
 PangenomeTsvFiles is a reference to a hash where the following keys are defined:
 	genomes_path has a value which is a string
 	orthologs_path has a value which is a string
@@ -143,8 +141,6 @@ $files is a PangenomeFileUtil.PangenomeTsvFiles
 PangenomeToFileParams is a reference to a hash where the following keys are defined:
 	pangenome_name has a value which is a string
 	workspace_name has a value which is a string
-	save_to_shock has a value which is a PangenomeFileUtil.boolean
-boolean is an int
 PangenomeTsvFiles is a reference to a hash where the following keys are defined:
 	genomes_path has a value which is a string
 	orthologs_path has a value which is a string
@@ -225,8 +221,6 @@ $file is a PangenomeFileUtil.PangenomeExcelFile
 PangenomeToFileParams is a reference to a hash where the following keys are defined:
 	pangenome_name has a value which is a string
 	workspace_name has a value which is a string
-	save_to_shock has a value which is a PangenomeFileUtil.boolean
-boolean is an int
 PangenomeExcelFile is a reference to a hash where the following keys are defined:
 	path has a value which is a string
 	shock_id has a value which is a string
@@ -242,8 +236,6 @@ $file is a PangenomeFileUtil.PangenomeExcelFile
 PangenomeToFileParams is a reference to a hash where the following keys are defined:
 	pangenome_name has a value which is a string
 	workspace_name has a value which is a string
-	save_to_shock has a value which is a PangenomeFileUtil.boolean
-boolean is an int
 PangenomeExcelFile is a reference to a hash where the following keys are defined:
 	path has a value which is a string
 	shock_id has a value which is a string
@@ -486,6 +478,36 @@ ExportOutput is a reference to a hash where the following keys are defined:
 }
  
   
+sub status
+{
+    my($self, @args) = @_;
+    if ((my $n = @args) != 0) {
+        Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+                                   "Invalid argument count for function status (received $n, expecting 0)");
+    }
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+        method => "PangenomeFileUtil.status",
+        params => \@args,
+    });
+    if ($result) {
+        if ($result->is_error) {
+            Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+                           code => $result->content->{error}->{code},
+                           method_name => 'status',
+                           data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+                          );
+        } else {
+            return wantarray ? @{$result->result} : $result->result->[0];
+        }
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method status",
+                        status_line => $self->{client}->status_line,
+                        method_name => 'status',
+                       );
+    }
+}
+   
 
 sub version {
     my ($self) = @_;
@@ -624,7 +646,6 @@ shock_id has a value which is a string
 a reference to a hash where the following keys are defined:
 pangenome_name has a value which is a string
 workspace_name has a value which is a string
-save_to_shock has a value which is a PangenomeFileUtil.boolean
 
 </pre>
 
@@ -635,7 +656,6 @@ save_to_shock has a value which is a PangenomeFileUtil.boolean
 a reference to a hash where the following keys are defined:
 pangenome_name has a value which is a string
 workspace_name has a value which is a string
-save_to_shock has a value which is a PangenomeFileUtil.boolean
 
 
 =end text

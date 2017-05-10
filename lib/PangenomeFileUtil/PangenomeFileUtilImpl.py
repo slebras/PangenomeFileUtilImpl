@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #BEGIN_HEADER
 
 import os
@@ -24,16 +25,16 @@ class PangenomeFileUtil:
     
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
-    VERSION = "0.0.1"
-    GIT_URL = "git@github.com:kbaseapps/PangenomeFileUtilImpl.git"
-    GIT_COMMIT_HASH = "361a61c8687721bbbf8bc3afb348af929d1e82d5"
-    
+    ######################################### noqa
+    VERSION = "0.0.2"
+    GIT_URL = "https://github.com/rsutormin/PangenomeFileUtilImpl"
+    GIT_COMMIT_HASH = "7480370491807308fec0f65fce42ca6abd28ece4"
+
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -49,14 +50,13 @@ class PangenomeFileUtil:
         self.callback_url = os.environ['SDK_CALLBACK_URL']
         #END_CONSTRUCTOR
         pass
-    
+
 
     def pangenome_to_tsv_file(self, ctx, params):
         """
         :param params: instance of type "PangenomeToFileParams" -> structure:
            parameter "pangenome_name" of String, parameter "workspace_name"
-           of String, parameter "save_to_shock" of type "boolean" (A boolean
-           - 0 for false, 1 for true. @range (0, 1))
+           of String
         :returns: instance of type "PangenomeTsvFiles" -> structure:
            parameter "genomes_path" of String, parameter "orthologs_path" of
            String, parameter "shock_id" of String
@@ -130,8 +130,7 @@ class PangenomeFileUtil:
         """
         :param params: instance of type "PangenomeToFileParams" -> structure:
            parameter "pangenome_name" of String, parameter "workspace_name"
-           of String, parameter "save_to_shock" of type "boolean" (A boolean
-           - 0 for false, 1 for true. @range (0, 1))
+           of String
         :returns: instance of type "PangenomeExcelFile" -> structure:
            parameter "path" of String, parameter "shock_id" of String
         """
@@ -297,7 +296,6 @@ class PangenomeFileUtil:
                              'output is not type dict as required.')
         # return the results
         return [output]
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
