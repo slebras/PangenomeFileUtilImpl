@@ -2,7 +2,8 @@ import unittest
 import os
 import json
 import time
-import shutil
+import pandas as pd
+import filecmp
 
 from os import environ
 try:
@@ -97,7 +98,9 @@ class PangenomeFileUtilTest(unittest.TestCase):
         res = self.getImpl().pangenome_to_tsv_file(self.getContext(), {
                 'pangenome_name': self.obj_name,
                 'workspace_name': self.wsName,
-            })
+            })[0]
+        assert filecmp.cmp(res['genomes_path'], 'data/pangen3_Genomes.tsv')
+        assert filecmp.cmp(res['orthologs_path'], 'data/pangen3_Orthologs.tsv')
         pprint(res)
         # test bad input
         with self.assertRaises(ValueError):
@@ -109,8 +112,12 @@ class PangenomeFileUtilTest(unittest.TestCase):
         res = self.getImpl().pangenome_to_excel_file(self.getContext(), {
                 'pangenome_name': self.obj_name,
                 'workspace_name': self.wsName,
-            })
+            })[0]
         pprint(res)
+        df1 = pd.read_excel(res['path'])
+        df2 = pd.read_excel('data/pangen3.xlsx')
+        assert all(df1 == df2)
+
         # test bad input
         with self.assertRaises(ValueError):
             self.getImpl().pangenome_to_excel_file(self.getContext(), {
