@@ -105,7 +105,7 @@ class PangenomeFileUtilTest(unittest.TestCase):
         # test bad input
         with self.assertRaises(ValueError):
             self.getImpl().pangenome_to_tsv_file(self.getContext(), {
-                'pangenome_ref': self.wsName + '/' + self.obj_name
+                'input_ref': self.wsName + '/' + self.obj_name
             })
 
     def test_to_excel(self):
@@ -121,12 +121,12 @@ class PangenomeFileUtilTest(unittest.TestCase):
         # test bad input
         with self.assertRaises(ValueError):
             self.getImpl().pangenome_to_excel_file(self.getContext(), {
-                'pangenome_ref': self.wsName + '/' + self.obj_name
+                'input_ref': self.wsName + '/' + self.obj_name
             })
 
     def test_export_tsv(self):
         res = self.getImpl().export_pangenome_as_tsv_file(self.getContext(), {
-                'pangenome_ref': self.wsName + '/' + self.obj_name
+                'input_ref': self.wsName + '/' + self.obj_name
             })
         pprint(res)
         # test bad input
@@ -139,7 +139,7 @@ class PangenomeFileUtilTest(unittest.TestCase):
     def test_export_excel(self):
         res = self.getImpl().export_pangenome_as_excel_file(self.getContext(),
             {
-                'pangenome_ref': self.wsName + '/' + self.obj_name
+                'input_ref': self.wsName + '/' + self.obj_name
             })
         pprint(res)
         # test bad input

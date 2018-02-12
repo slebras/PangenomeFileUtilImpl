@@ -105,7 +105,8 @@ class PangenomeFileUtil:
 
         print('export_pangenome_as_tsv_file -- paramaters = ')
         pprint(params)
-        self.pgdnld.validate_params(params, {'pangenome_ref'})
+        self.pgdnld.validate_params(params, {'input_ref'})
+        params['pangenome_ref'] = params['input_ref']
         pg_name, files = self.pgdnld.to_tsv(params)
         output = self.pgdnld.export(files.values(), pg_name, params)
 
@@ -131,7 +132,8 @@ class PangenomeFileUtil:
 
         print('export_pangenome_as_excel_file -- paramaters = ')
         pprint(params)
-        self.pgdnld.validate_params(params, {'pangenome_ref'})
+        self.pgdnld.validate_params(params, {'input_ref'})
+        params['pangenome_ref'] = params['input_ref']
         pg_name, file = self.pgdnld.to_excel(params)
         output = self.pgdnld.export(file.values(), pg_name, params)
 
