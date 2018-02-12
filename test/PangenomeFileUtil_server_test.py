@@ -2,7 +2,8 @@ import unittest
 import os
 import json
 import time
-import shutil
+import pandas as pd
+import filecmp
 
 from os import environ
 try:
@@ -13,6 +14,7 @@ except:
 from pprint import pprint
 
 from biokbase.workspace.client import Workspace as workspaceService
+from GenomeAnnotationAPI.GenomeAnnotationAPIClient import GenomeAnnotationAPI
 from PangenomeFileUtil.PangenomeFileUtilImpl import PangenomeFileUtil
 from PangenomeFileUtil.PangenomeFileUtilServer import MethodContext
 
@@ -40,7 +42,42 @@ class PangenomeFileUtilTest(unittest.TestCase):
             cls.cfg[nameval[0]] = nameval[1]
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL, token=token)
+        suffix = int(time.time() * 1000)
+        cls.wsName = "test_PangenomeFileUtil_" + str(suffix)
+        cls.wsClient.create_workspace({'workspace': cls.wsName})
         cls.serviceImpl = PangenomeFileUtil(cls.cfg)
+        cls.gaa = GenomeAnnotationAPI(os.environ['SDK_CALLBACK_URL'])
+        cls.prepare_data()
+
+    @classmethod
+    def prepare_data(cls):
+        cls.obj_name = 'pangen3'
+        g_1_data = json.load(open("data/Rhodobacter_CACIA_14H1.json"))
+        info = cls.gaa.save_one_genome_v1({"data": g_1_data,
+                                           "workspace": cls.wsName,
+                                           "name": "Acoerulea.JGI1.1"
+                                           })['info']
+        g_1_ref = "{}/{}/{}".format(info[6], info[0], info[4])
+
+        g_2_data = json.load(open("data/Rhodobacter_sphaeroides_2.4.1.json"))
+        info = cls.gaa.save_one_genome_v1({"data": g_2_data,
+                                           "workspace": cls.wsName,
+                                           "name": "Rhodobacter_sphaeroides_2.4.1"
+                                           })['info']
+        g_2_ref = "{}/{}/{}".format(info[6], info[0], info[4])
+
+        pangen_text = open("data/pangen3.json").read()
+        pangen_data = json.loads(pangen_text.replace(
+            "<genome_1>", g_1_ref).replace("<genome_2>", g_2_ref))
+
+        info = cls.wsClient.save_objects({'workspace': cls.wsName, 'objects': [
+                   {
+                        'type': 'KBaseGenomes.Pangenome',
+                        'data': pangen_data,
+                        'name': cls.obj_name
+                    }]})
+        print('saved dummy pangenome')
+        pprint(info)
 
     @classmethod
     def tearDownClass(cls):
@@ -51,73 +88,63 @@ class PangenomeFileUtilTest(unittest.TestCase):
     def getWsClient(self):
         return self.__class__.wsClient
 
-    def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_PangenomeFileUtil_" + str(suffix)
-        ret = self.getWsClient().create_workspace({'workspace': wsName})
-        self.__class__.wsName = wsName
-        return wsName
-
     def getImpl(self):
         return self.__class__.serviceImpl
 
     def getContext(self):
         return self.__class__.ctx
 
-    def test_your_method(self):
-        pfut = self.getImpl()
-
-        # upload pangenome object (needs genomes, but assumes old genome type!!)
-        # skip this for now, and use a preloaded one
-        obj_name = 'pangenome'
-        ws_name =  'msneddon:1450308782878' #self.getWsName()
-        #with open(os.path.join('data','dummy_pangenome.json')) as data_file:    
-        #    pgData = json.load(data_file)
-        #ws = self.getWsClient();
-        #info = ws.save_objects({'workspace':self.getWsName(), 'objects':[
-        #            {
-        #                'type':'KBaseGenomes.Pangenome',
-        #                'data':pgData,
-        #                'name':obj_name
-        #            }]})
-        #print('saved dummy pangenome')
-        #pprint(info)
-
-        # attempt to download as tsv file
-        res = pfut.pangenome_to_tsv_file(self.getContext(),
-                                        {
-                                            'pangenome_name':obj_name,
-                                            'workspace_name':ws_name,
-                                        })
+    def test_to_tsv(self):
+        res = self.getImpl().pangenome_to_tsv_file(self.getContext(), {
+                'pangenome_name': self.obj_name,
+                'workspace_name': self.wsName,
+            })[0]
+        assert filecmp.cmp(res['genomes_path'], 'data/pangen3_Genomes.tsv')
+        assert filecmp.cmp(res['orthologs_path'], 'data/pangen3_Orthologs.tsv')
         pprint(res)
+        # test bad input
+        with self.assertRaises(ValueError):
+            self.getImpl().pangenome_to_tsv_file(self.getContext(), {
+                'pangenome_ref': self.wsName + '/' + self.obj_name
+            })
 
-        # attempt to create the download package
-        res = pfut.export_pangenome_as_tsv_file(self.getContext(),
-                                        {
-                                            'input_ref':ws_name + '/' + obj_name
-                                        })
+    def test_to_excel(self):
+        res = self.getImpl().pangenome_to_excel_file(self.getContext(), {
+                'pangenome_name': self.obj_name,
+                'workspace_name': self.wsName,
+            })[0]
         pprint(res)
-        # need a little cleanup because we try to run on this object twice- normally
-        # the sdk will give you a fresh directory so this is not a problem.
-        shutil.rmtree(os.path.join(self.__class__.cfg['scratch'],obj_name))
+        df1 = pd.read_excel(res['path'])
+        df2 = pd.read_excel('data/pangen3.xlsx')
+        assert all(df1 == df2)
 
+        # test bad input
+        with self.assertRaises(ValueError):
+            self.getImpl().pangenome_to_excel_file(self.getContext(), {
+                'pangenome_ref': self.wsName + '/' + self.obj_name
+            })
 
-
-        res = pfut.pangenome_to_excel_file(self.getContext(),
-                                        {
-                                            'pangenome_name':obj_name,
-                                            'workspace_name':ws_name,
-                                        })
-        # attempt to create the download package
-        res = pfut.export_pangenome_as_excel_file(self.getContext(),
-                                        {
-                                            'input_ref':ws_name + '/' + obj_name
-                                        })
+    def test_export_tsv(self):
+        res = self.getImpl().export_pangenome_as_tsv_file(self.getContext(), {
+                'pangenome_ref': self.wsName + '/' + self.obj_name
+            })
         pprint(res)
+        # test bad input
+        with self.assertRaises(ValueError):
+            self.getImpl().export_pangenome_as_tsv_file(self.getContext(), {
+                'pangenome_name': self.obj_name,
+                'workspace_name': self.wsName,
+            })
 
-
+    def test_export_excel(self):
+        res = self.getImpl().export_pangenome_as_excel_file(self.getContext(),
+            {
+                'pangenome_ref': self.wsName + '/' + self.obj_name
+            })
         pprint(res)
-
-        
+        # test bad input
+        with self.assertRaises(ValueError):
+            self.getImpl().export_pangenome_as_excel_file(self.getContext(), {
+                'pangenome_name': self.obj_name,
+                'workspace_name': self.wsName,
+            })
