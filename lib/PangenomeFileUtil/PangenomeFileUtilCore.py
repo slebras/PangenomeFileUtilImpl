@@ -70,9 +70,9 @@ class PangenomeDownload:
         ortho = {}
         for cluster in pangen['orthologs']:
             ortho[cluster['id']] = {
-                "representative function": cluster['function'],
-                "type": "",
-                "protein sequence": "",
+                "representative function": cluster.get('function', ""),
+                "type": cluster.get("type", ""),
+                "protein sequence": cluster.get("protein_translation", ""),
             }
             for gid, name in id_name_map.items():
                 ortho[cluster['id']][name] = ";".join(
