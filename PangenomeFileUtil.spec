@@ -7,6 +7,20 @@ module PangenomeFileUtil {
     */
     typedef int boolean;
 
+
+    typedef structure{
+        string pangenome_name;
+        string workspace_name;
+        string json_data_path;
+    } toPangenomeParams;
+
+    typedef structure{
+        string pangenome_ref;
+    } PangenomeUploadOutput;
+
+    funcdef upload_pangenome_to_workspace(toPangenomeParams params)
+                returns(PangenomeUploadOutput output) authentication required;
+
     typedef structure {
         string genomes_path;
         string orthologs_path;
