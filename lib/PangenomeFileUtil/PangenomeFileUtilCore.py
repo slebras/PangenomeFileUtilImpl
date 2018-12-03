@@ -6,8 +6,6 @@ import uuid
 from DataFileUtil.DataFileUtilClient import DataFileUtil
 from PangenomeAPI.PangenomeAPIClient import PanGenomeAPI
 
-from installed_clients.WsLargeDataIOClient import WsLargeDataIO
-
 
 class PangenomeUploadDownload:
     def __init__(self, config):
@@ -15,7 +13,6 @@ class PangenomeUploadDownload:
         self.scratch = config['scratch']
         self.pga = PanGenomeAPI(os.environ['SDK_CALLBACK_URL'])
         self.dfu = DataFileUtil(os.environ['SDK_CALLBACK_URL'])
-        self.ws_large_data = WsLargeDataIO(os.environ['SDK_CALLBACK_URL'])
 
     @staticmethod
     def validate_params(params, expected={"workspace_name", "pangenome_name"}):
@@ -40,7 +37,8 @@ class PangenomeUploadDownload:
         workspace_name = params['workspace_name']
         pg_name = params['pangenome_name']
 
-        pangenome = params['json_data_path']
+        # find better way of passing
+        pangenome = json.load(params['json_data_path'])
 
         if 'meta' in params and params['meta']:
             meta = params['meta']
@@ -66,15 +64,15 @@ class PangenomeUploadDownload:
         save_params = {
             'id': workspace_id,
             'objects': [{
-                'type', 'KBaseGenomes.Pangenome',
-                'data_json_file': pangenome,
+                'type': 'KBaseGenomes.Pangenome',
+                'data': pangenome,
                 'name': name,
                 'meta': meta,
                 'hidden': hidden
             }]
         }
 
-        info = self.ws_large_data.save_objects(save_params)[0]
+        info = self.dfu.save_objects(save_params)[0]
 
         ref = "{}/{}/{}".format(info[6], info[0], info[4])
         print("Pangenome saved to {}".format(ref))

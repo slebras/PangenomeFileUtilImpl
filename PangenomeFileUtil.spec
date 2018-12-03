@@ -21,6 +21,7 @@ module PangenomeFileUtil {
     funcdef upload_pangenome_to_workspace(toPangenomeParams params)
                 returns(PangenomeUploadOutput output) authentication required;
 
+
     typedef structure {
         string genomes_path;
         string orthologs_path;

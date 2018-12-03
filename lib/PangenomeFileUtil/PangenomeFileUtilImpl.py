@@ -39,6 +39,10 @@ class PangenomeFileUtil:
 
     def upload_pangenome_to_workspace(self, ctx, params):
         """
+        params:
+            'workspace_name':
+            'json_data_path': 
+            'pangenome_name': 
         """
         print('uploading pangenome to workspace -- parameters = ')
         pprint(params)
